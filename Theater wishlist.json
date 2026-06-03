@@ -1,0 +1,473 @@
+{
+  "name": "Theater wishlist",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "54c75593-6beb-4c3f-9182-76b6e9deba5a",
+      "name": "Telegram Trigger",
+      "webhookId": "3d66fc48-8151-4d4e-ab4f-adcfc8914dec",
+      "credentials": {
+        "telegramApi": {
+          "id": "Q0btL2KSVTEeBLCJ",
+          "name": "Tehno pro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "eb953eda-ef5a-43f5-8cdb-3874cd7007c2",
+              "name": "=text",
+              "value": "={{ $json.message.text || $json.message.caption || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "1285a0a4-175c-4ef5-b8dd-08e32e220b77",
+              "name": "=source_channel",
+              "value": "={{\n  $json.message.forward_origin?.chat?.title\n  || $json.message.forward_from_chat?.title\n  || [\n    $json.message.forward_origin?.sender_user?.first_name,\n    $json.message.forward_origin?.sender_user?.last_name\n  ].filter(Boolean).join(' ')\n  || [\n    $json.message.forward_from?.first_name,\n    $json.message.forward_from?.last_name\n  ].filter(Boolean).join(' ')\n  || $json.message.forward_sender_name\n  || 'Я'\n}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "8eff5a37-49c4-4453-85f0-44b127474e38",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "items",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        864,
+        0
+      ],
+      "id": "f57294b7-2b3d-44e6-9704-b1b1159818b3",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Обработай это Telegram-сообщение.\n\nТекст:\n{{ $json.text }}\n\nИсточник:\n{{ $json.source_channel }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=Ты AI Agent для личного театрального wishlist.\n\nНа вход приходит Telegram-сообщение: ссылка, текст, пересланный пост или заметка.\nТакже приходит источник рекомендации.\n\nТвоя задача: извлечь одну или несколько карточек спектаклей и вернуть их в формате JSON. КРИТИЧНО: твой ответ должен быть только валидным JSON-объектом.\nНельзя писать пояснения, markdown, текст до JSON или после JSON.\nКорневой объект всегда должен иметь поле items.\n\nЕсли в сообщении уже есть ссылка:\n- используй эту ссылку как link;\n- если по ссылке можно понять название, театр, город и категорию, уточни эти поля.\n- director — режиссёр спектакля, если он явно указан в сообщении или найден на официальной странице. Если неизвестен, оставь пустую строку.\nЕсли в сообщении нет ссылки:\n- попробуй найти официальный сайт спектакля через доступные инструменты поиска;\n- ищи по связке: название спектакля + театр + официальный сайт;\n- link заполняй только ссылкой на официальный сайт театра или площадки;\n- не используй Афишу, Яндекс, Ticketland, Timepad, Kassир, KudaGo, 2ГИС, агрегаторы билетов, подборки и случайные сайты;\n- если официальную ссылку нельзя найти уверенно, оставь link пустым.\n\nВерни строго JSON без пояснений, без markdown:\n\n{\n  \"items\": [\n    {\n      \"title\": \"\",\n      \"theater\": \"\",\n      \"director\": \"\",\n      \"city\": \"Москва\",\n      \"category\": \"adult\",\n      \"status\": \"want\",\n      \"link\": \"\",\n      \"source\": \"\",\n      \"note\": \"\",\n      \"tags\": []\n    }\n  ]\n}\n\nПравила заполнения:\n- source всегда бери из поля \"Источник\".\n- title — название спектакля без лишних кавычек.\n- theater — театр или площадка.\n- city — Москва по умолчанию, Санкт-Петербург только если это явно понятно.\n- category только \"adult\" или \"kids\".\n- Если спектакль детский, семейный, для детей, 0+, 3+, 6+, 8+, 10+ — ставь \"kids\".\n- Если явно не понятно, ставь \"adult\".\n- status всегда \"want\", если в сообщении не сказано, что спектакль уже смотрели или билеты куплены.\n- Если сказано \"смотрели\", \"уже смотрела\", \"ходили\" — status ставь \"seen\".\n- Если сказано \"купила билеты\", \"билеты куплены\" — status ставь \"bought\".\n- note: сделай короткое саммари из сообщения на русском языке, 1 короткое предложение.\n- Если в сообщении почти нет описания, а есть только ссылка, note оставь пустой строкой.\n- Не копируй весь текст сообщения в note, только суть: почему спектакль интересен, для кого, что важного сказано.\n- Если есть #NY, #НовыйГод, Новый год, Щелкунчик, Двенадцать месяцев или новогодний смысл — добавь тег \"#NY\".\n- Если есть слова подростки, подростковый, 12+, 14+, 16+ — добавь тег \"#подростки\".\n- tags всегда массив строк, например [\"#NY\"].\n- Если сообщение содержит несколько спектаклей, верни несколько объектов в items.\n- Не выдумывай факты. Если не уверен в поле, оставь пустую строку, кроме city/category/status.",
+          "maxIterations": 4,
+          "returnIntermediateSteps": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "14e069ce-3430-4cf6-b588-9db4515bf45f",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        288,
+        208
+      ],
+      "id": "b31b716a-2da8-4630-9298-c07fed6fd33e",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "OAqGCJrRwveF3eU5",
+          "name": "Ключ для OpenAI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Ищи в интернете официальную страницу спектакля на сайте театра или площадки. Используй этот инструмент, если в сообщении нет ссылки или нужно проверить ссылку. В финальный link можно ставить только официальный сайт театра/площадки. Не используй агрегаторы и афиши: Яндекс, Афиша, Ticketland, Timepad, Kassir, KudaGo, 2ГИС, соцсети и новостные статьи.",
+        "query": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Query', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "@tavily/n8n-nodes-tavily.tavilyTool",
+      "typeVersion": 1,
+      "position": [
+        640,
+        304
+      ],
+      "id": "e5aa52ae-cd26-4895-a92a-994c801af0e4",
+      "name": "Search in Tavily",
+      "credentials": {
+        "tavilyApi": {
+          "id": "O8ooMPTk0wDa1NPO",
+          "name": "Tavily account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $json.output;\n\nconst parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;\n\nreturn [\n  {\n    json: parsed\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        0
+      ],
+      "id": "d595e703-9b1b-442a-b55e-e5ef1eddbe5d",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "tableId": "performances",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "id",
+              "fieldValue": "={{ 'tg_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7) }}"
+            },
+            {
+              "fieldId": "title",
+              "fieldValue": "={{ $('Split Out').item.json.title || '' }}"
+            },
+            {
+              "fieldId": "theater",
+              "fieldValue": "={{ $('Split Out').item.json.theater || '' }}"
+            },
+            {
+              "fieldId": "city",
+              "fieldValue": "={{ $('Split Out').item.json.city || 'Москва' }}"
+            },
+            {
+              "fieldId": "category",
+              "fieldValue": "={{ $('Split Out').item.json.category || 'adult' }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "={{ $('Split Out').item.json.status || 'want' }}"
+            },
+            {
+              "fieldId": "link",
+              "fieldValue": "={{ $('Split Out').item.json.link || '' }}"
+            },
+            {
+              "fieldId": "source",
+              "fieldValue": "={{ $('Split Out').item.json.source || 'Telegram' }}"
+            },
+            {
+              "fieldId": "note",
+              "fieldValue": "={{ $('Split Out').item.json.note || '' }}"
+            },
+            {
+              "fieldId": "director",
+              "fieldValue": "={{ $('Split Out').item.json.director || '' }}"
+            },
+            {
+              "fieldId": "data",
+              "fieldValue": "={{ { tags: $('Split Out').item.json.tags || [] } }}"
+            },
+            {
+              "fieldId": "display_order",
+              "fieldValue": "={{ Math.floor(Date.now() / 1000) }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1440,
+        96
+      ],
+      "id": "b2e6cda0-3997-43c5-91cb-0f6e49d0a696",
+      "name": "Create a row",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Pci7KmZUx9yzkDxV",
+          "name": "Personal hub"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "performances",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "title",
+              "condition": "ilike",
+              "keyValue": "={{ '*' + $json.title + '*' }}"
+            },
+            {
+              "keyName": "theater",
+              "condition": "ilike",
+              "keyValue": "={{ '*' + $json.theater + '*' }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1008,
+        0
+      ],
+      "id": "1e07a483-c882-403f-93dd-51708f537221",
+      "name": "Get many rows",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "Pci7KmZUx9yzkDxV",
+          "name": "Personal hub"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "6533438e-0dde-41f8-80c5-6124e44aa0a5",
+              "leftValue": "={{ Boolean($json.id) }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1200,
+        16
+      ],
+      "id": "4d9e0f69-2005-4c85-b419-f53311f02789",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=Добавила в театральный wishlist 🎭  {{ $('Split Out').item.json.title }} {{ $('Split Out').item.json.theater }}  Проверяй здесь: file:///Users/svetlanasoloveva/Documents/WishList/theatre-wishlist.html",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1648,
+        96
+      ],
+      "id": "aaff48a7-11d5-4777-ac81-ba9ad7684329",
+      "name": "Send a text message",
+      "webhookId": "ce8251c3-e784-4ed6-8749-eb1474684b9a",
+      "credentials": {
+        "telegramApi": {
+          "id": "Q0btL2KSVTEeBLCJ",
+          "name": "Tehno pro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=*Уже есть похожая карточка*\n\n🎭 {{ $json.title }}\n🏛 {{ $json.theater }}\n🔗 {{ $json.link || 'ссылка не указана' }}\n\n*Новая заявка:*\n🎭 {{ $('Split Out').item.json.title }}\n🏛 {{ $('Split Out').item.json.theater }}\n🔗 {{ $('Split Out').item.json.link || 'ссылка не указана' }}\n\n*Что делаем?*\n1. Если это дубль — ничего не надо\n2. Если это другой спектакль — добавь вручную на сайте или пришли уточнение",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1408,
+        -80
+      ],
+      "id": "586d2a8a-bce2-4822-b608-e20d7ec81e71",
+      "name": "Send a text message1",
+      "webhookId": "eef9f218-a496-4386-9bca-725a6438f769",
+      "credentials": {
+        "telegramApi": {
+          "id": "Q0btL2KSVTEeBLCJ",
+          "name": "Tehno pro"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Get many rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search in Tavily": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many rows": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a row": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "c17cf842-ef85-424d-9c96-ada0a51eb631",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6b0893e2c48c733b707ebd88341ca6560afe1f5e7e004bdd492e3e174a30760d"
+  },
+  "id": "7ZXzGctoClDH7Jsg",
+  "tags": []
+}

@@ -36,6 +36,10 @@ python3 -m http.server 3000
 
 Эта карта файлов.
 
+`N8N_AUTOMATION.md`
+
+Документация по n8n-сценарию: Telegram-бот, AI Agent, проверка дублей, Supabase Insert и ответы в Telegram.
+
 ## Архивы
 
 `theatre-wishlist-rescue-fixed.zip`
@@ -45,4 +49,3 @@ python3 -m http.server 3000
 `theatre-wishlist-backup-*.zip`
 
 Ручные бэкапы. Их можно хранить отдельно и не обязательно отправлять в GitHub.
-

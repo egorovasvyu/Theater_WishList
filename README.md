@@ -8,6 +8,7 @@
 - `index.html` — стартовая страница для Replit, сразу открывает `theatre-wishlist.html`.
 - `.replit` — команда запуска для Replit.
 - `.gitignore` — файлы, которые не нужно отправлять в Git.
+- `N8N_AUTOMATION.md` — документация по Telegram/n8n/Supabase-автоматизации.
 - `theatre-wishlist-rescue-fixed.zip` — текущий архив проекта.
 - `theatre-wishlist-backup-*.zip` — ручной бэкап на случай восстановления.
 
@@ -64,4 +65,3 @@ PIN:
 ```text
 DEPLOY.md
 ```
-
