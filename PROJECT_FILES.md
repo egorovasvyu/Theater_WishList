@@ -1,0 +1,48 @@
+# Карта файлов
+
+## Главные файлы
+
+`theatre-wishlist.html`
+
+Основная страница театрального wishlist.
+
+`index.html`
+
+Стартовая страница для Replit. Она автоматически открывает `theatre-wishlist.html`.
+
+`.replit`
+
+Команда запуска Replit:
+
+```bash
+python3 -m http.server 3000
+```
+
+`.gitignore`
+
+Исключает служебные файлы из Git.
+
+## Документы
+
+`README.md`
+
+Короткое описание проекта.
+
+`DEPLOY.md`
+
+Пошаговая инструкция для GitHub Desktop и Replit.
+
+`PROJECT_FILES.md`
+
+Эта карта файлов.
+
+## Архивы
+
+`theatre-wishlist-rescue-fixed.zip`
+
+Текущий архив проекта.
+
+`theatre-wishlist-backup-*.zip`
+
+Ручные бэкапы. Их можно хранить отдельно и не обязательно отправлять в GitHub.
+
