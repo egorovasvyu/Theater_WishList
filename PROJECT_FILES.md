@@ -10,12 +10,16 @@
 
 Стартовая страница для Replit. Она автоматически открывает `theatre-wishlist.html`.
 
+`main.py`
+
+Маленький сервер для Replit. Запускает сайт на порту `3000`.
+
 `.replit`
 
 Команда запуска Replit:
 
 ```bash
-python3 -m http.server 3000
+python3 main.py
 ```
 
 `.gitignore`

@@ -6,6 +6,7 @@
 
 - `theatre-wishlist.html` — основная страница.
 - `index.html` — стартовая страница для Replit, сразу открывает `theatre-wishlist.html`.
+- `main.py` — маленький сервер для запуска сайта на Replit.
 - `.replit` — команда запуска для Replit.
 - `.gitignore` — файлы, которые не нужно отправлять в Git.
 - `N8N_AUTOMATION.md` — документация по Telegram/n8n/Supabase-автоматизации.
@@ -23,7 +24,7 @@
 Или запусти локальный сервер из папки проекта:
 
 ```bash
-python3 -m http.server 3000
+python3 main.py
 ```
 
 После этого открой:

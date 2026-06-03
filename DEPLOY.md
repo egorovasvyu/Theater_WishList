@@ -13,6 +13,7 @@
 ```text
 theatre-wishlist.html
 index.html
+main.py
 README.md
 DEPLOY.md
 .replit
@@ -73,7 +74,7 @@ theatre-wishlist
 5. Если Replit спросит команду запуска, используй:
 
 ```bash
-python3 -m http.server 3000
+python3 main.py
 ```
 
 Файл `.replit` уже содержит эту команду.
@@ -101,4 +102,3 @@ python3 -m http.server 3000
 cd "/Users/svetlanasoloveva/Documents/WishList"
 zip -r "theatre-wishlist-backup-$(date +%Y%m%d-%H%M%S).zip" .
 ```
-
